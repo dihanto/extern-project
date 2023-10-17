@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grafik Penjualan</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="grafikPenjualan"></canvas>
+</body>
+<script>
+    const ctx = document.getElementById('grafikPenjualan').getContext('2d');
+
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    function fetchDataAndUpdateChart() {
+         fetch('https://script.google.com/macros/s/AKfycbxhqPyfJ5_nY_6-3D4xYcLtcNdBGeLn0rRhb10GFYvzQGou7vU1D19zsgA7QRz0Gpua/exec')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.content && data.content.length > 0) {
+                data.content.shift();
+                const labels = data.content.map(entry => entry[0]);
+                const datasetData = data.content.map(entry => entry[1]);
+                
+               
+                grafik.data.labels = labels;
+                grafik.data.datasets[0].data = datasetData;
+                grafik.update(); 
+            } else {
+                console.error("Data tidak valid atau tidak ada data yang ditemukan.");
+            }
+        })
+        .catch(error => {
+            console.error("Gagal mengambil data:", error);
+        });
+    }
+
+    fetchDataAndUpdateChart();
+
+    setInterval(fetchDataAndUpdateChart, 10000);
+
+    var options = {
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 10
+                }
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Grafik Penjualan',
+                font: {
+                    size: 16
+                }
+            }
+        },
+        animation: {
+            duration: 1000,
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        }
+    };
+
+    function generateRandomColors(count) {
+        const colors = [];
+        for (let i = 0; i < count; i++) {
+            colors.push(getRandomColor());
+        }
+        return colors;
+    }
+
+    const randomColors = generateRandomColors(100); 
+
+    var grafik = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Data Penjualan',
+                data: [],
+                backgroundColor: randomColors, 
+                borderWidth: 2,
+                borderColor: randomColors 
+            }]
+        },
+        options: options,
+        responsive: true,
+        maintainAspectRatio: false
+    });
+
+</script>
+</html>
